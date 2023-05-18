@@ -85,5 +85,22 @@ fun TaxiPark.findTheMostFrequentTripDurationPeriod(): IntRange? {
  * Check whether 20% of the drivers contribute 80% of the income.
  */
 fun TaxiPark.checkParetoPrinciple(): Boolean {
-    TODO()
+    fun checkPareto(): Boolean {
+        val driversThreshold = (allDrivers.count() * 0.2).toInt()
+        val incomeThreshold = trips.map(Trip::cost).sum() * 0.8
+
+        val mostProfitableDriversIncome =
+            trips
+                .groupingBy { trip -> trip.driver }
+                .fold(0.0, { driverIncome, trip -> driverIncome + trip.cost })
+                .map { (_, driverIncome) -> driverIncome }
+                .sortedDescending()
+                .take(driversThreshold)
+                .sum()
+
+        return mostProfitableDriversIncome >= incomeThreshold
+    }
+
+    return if (trips.isEmpty()) false else checkPareto()
 }
+
